@@ -625,7 +625,6 @@
     .product-card-footer {
         display: flex;
         align-items: center;
-        justify-content: space-between;
         padding: 0.6rem 1rem;
         border-top: 1px solid var(--border-soft);
     }
@@ -636,6 +635,7 @@
         gap: 0.35rem;
         font-size: 0.72rem;
         font-weight: 600;
+        margin-right: auto;
     }
 
     .disponivel-dot::before {
