@@ -394,6 +394,10 @@
           </button>
 
         </form>`;
+        document.getElementById('produtoForm').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          
+        });
     }
 
     // ── INIT ──────────────────────────────────────────────────────────────────
