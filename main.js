@@ -230,6 +230,11 @@
                 <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
               </svg>
             </button>
+            <button class="btn-edit" onclick="editarProduto('${p.id}', '${p.nome.replace(/'/g,"\\'")}', '${p.slug}', ${p.preco}, '${p.categoria}', \`${p.descricao || ''}\`, '${p.img || ''}', ${p.isDisponivel || p.disponivel})" title="Editar produto">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4L16.5 3.5z"/>
+              </svg>
+            </button>
           </div>
         </div>
       `).join('');
