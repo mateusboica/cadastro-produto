@@ -398,9 +398,8 @@
           e.preventDefault();
           
         });
-
-        exibirForm();
     }
 
     // ── INIT ──────────────────────────────────────────────────────────────────
     carregarProdutos();
+    exibirForm();
