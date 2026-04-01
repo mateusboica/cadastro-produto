@@ -679,6 +679,23 @@
         background: rgba(224, 92, 92, 0.1);
     }
 
+    .btn-edit {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--text-muted);
+        padding: 0.25rem;
+        border-radius: 6px;
+        transition: color var(--transition), background var(--transition);
+        display: flex;
+        align-items: center;
+    }
+
+    .btn-edit:hover {
+        color: var(--primary);
+        background: rgba(200, 90, 58, 0.1);
+    }
+
     /* ── EMPTY STATE ── */
     .empty-state {
         grid-column: 1 / -1;
