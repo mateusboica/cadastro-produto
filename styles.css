@@ -404,7 +404,7 @@
         align-items: center;
         justify-content: center;
         gap: 0.6rem;
-        background: var(--primary);
+        background: rgb(72, 170, 47);
         color: #fff;
         border: none;
         border-radius: var(--radius);
@@ -414,13 +414,15 @@
         font-family: 'DM Sans', sans-serif;
         cursor: pointer;
         transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
-        box-shadow: 0 4px 20px rgba(200, 90, 58, 0.3);
+        box-shadow: 0 4px 20px rgba(70, 200, 58, 0.3);
         margin-top: 0.5rem;
+        min-width: 0;
+        flex: 1;
     }
 
     .btn-submit:hover {
-        background: var(--primary-dim);
-        box-shadow: 0 6px 24px rgba(200, 90, 58, 0.4);
+        background: rgb(53, 126, 35);
+        box-shadow: rgb(72, 170, 47);
     }
 
     .btn-submit:active {
@@ -447,6 +449,13 @@
         to {
             transform: rotate(360deg);
         }
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        margin-top: 1rem;
     }
 
     /* ── TOAST ── */
@@ -694,6 +703,32 @@
     .btn-edit:hover {
         color: var(--primary);
         background: rgba(200, 90, 58, 0.1);
+    }
+
+    .btn-cancel {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.6rem;
+        background: var(--primary);
+        color: #fff;
+        border: none;
+        border-radius: var(--radius);
+        padding: 0.85rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        font-family: 'DM Sans', sans-serif;
+        cursor: pointer;
+        transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+        box-shadow: 0 4px 20px rgba(200, 90, 58, 0.3);
+        margin-top: 0.5rem;
+        min-width: 0;
+        flex: 1;
+    }
+
+   .btn-cancel:hover {
+        background: var(--primary-dim);
+        box-shadow: 0 6px 24px rgba(200, 90, 58, 0.4);
     }
 
     /* ── EMPTY STATE ── */
