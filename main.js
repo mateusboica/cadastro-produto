@@ -23,18 +23,18 @@
       }
 
       if (imagemInput) {
-        imagemInput.addEventListener('input', (e) => {
-          const url = e.target.value.trim();
+        imagemInput.addEventListener('change', (e) => {
+          const file = e.target.files[0];
           const img = document.getElementById('imgPreview');
           const wrap = document.getElementById('imgPreviewWrap');
-          if (url) {
-            if (img) img.src = url;
-            if (img) img.style.display = 'block';
-            if (wrap) wrap.classList.add('has-image');
-            if (img) img.onerror = () => {
-              img.style.display = 'none';
-              wrap.classList.remove('has-image');
+          if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              if (img) img.src = e.target.result;
+              if (img) img.style.display = 'block';
+              if (wrap) wrap.classList.add('has-image');
             };
+            reader.readAsDataURL(file);
           } else {
             if (img) img.style.display = 'none';
             if (wrap) wrap.classList.remove('has-image');
@@ -312,11 +312,11 @@
                   <circle cx="8.5" cy="8.5" r="1.5"/>
                   <polyline points="21 15 16 10 5 21"/>
                 </svg>
-                <p>Cole a URL da imagem abaixo</p>
+                <p>Selecione uma imagem</p>
               </div>
               <img id="imgPreview" alt="Preview" src="${img || ''}" style="${img ? 'display:block' : 'display:none'}" />
             </div>
-            <input type="url" id="imagem" placeholder="https://exemplo.com/foto.jpg" value="${img || ''}" />
+            <input type="file" id="imagem" accept="image/*" class="input-file"/>
           </div>
           <div class="field">
             <label>Tags</label>
@@ -453,11 +453,11 @@
                   <circle cx="8.5" cy="8.5" r="1.5"/>
                   <polyline points="21 15 16 10 5 21"/>
                 </svg>
-                <p>Cole a URL da imagem abaixo</p>
+                <p>Selecione uma imagem</p>
               </div>
               <img id="imgPreview" alt="Preview" />
             </div>
-            <input type="url" id="imagem" placeholder="https://exemplo.com/foto.jpg" />
+            <input type="file" id="imagem" accept="image/*" class="input-file" />
           </div>
 
           <div class="field">
