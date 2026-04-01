@@ -251,8 +251,149 @@
 
     // EDITAR
 
-    async function editarProduto(id) {
+    async function editarProduto(id, nome, slug, preco, categoria, descricao, img, disponivel) {
+      const editarProduto = document.getElementById('produtoForm');
+      editarProduto.innerHTML = ` 
+        <h2>Editar Produto</h2>
+        <form id="editarForm">
+          <input type="hidden" id="editarId" value="${id}" />
+          <label for="editarNome">Nome:</label>
+          <input type="text" id="editarNome" value="${nome}" required />
+          <label for="editarPreco">Preço:</label>
+          <input type="number" id="editarPreco" step="0.01" value="${preco}" required />
+          <label for="editarCategoria">Categoria:</label>
+          <select id="editarCategoria" value="${categoria}" required>
+            <option value="">Selecione uma categoria</option>
+            <option value="MOQUECAS">Moquecas</option>
+            <option value="FRUTOS_DO_MAR">Frutos do Mar</option>
+            <option value="ENTRADAS">Entradas</option>
+            <option value="ACOMPANHAMENTOS">Acomp.</option>
+            <option value="BEBIDAS">Bebidas</option>
+            <option value="SOBREMESAS">Sobremesas</option>
+          </select>
+          <label for="editarDescricao">Descrição:</label>
+          <textarea id="editarDescricao">${descricao}</textarea>
+          <label for="editarImagem">URL da Imagem:</label>
+          <input type="text" id="editarImagem" value="${img}" />
+          <label for="editarDisponivel">Disponível:</label>
+          <input type="checkbox" id="editarDisponivel" ${disponivel ? 'checked' : ''} />
+          <button type="submit">Salvar Alterações</button>
+        </form>
+      `;
+      document.getElementById('editarForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const updatedProduto = {
+          nome: document.getElementById('editarNome').value.trim(),
+          slug: gerarSlug(document.getElementById('editarNome').value.trim()),
+          preco: parseFloat(document.getElementById('editarPreco').value),
+          categoria: document.getElementById('editarCategoria').value,
+          descricao: document.getElementById('editarDescricao').value.trim(),
+          img: document.getElementById('editarImagem').value.trim() || null,
+          isDisponivel: document.getElementById('editarDisponivel').checked,
+        };
+        try {
+          const res = await fetch(`${API}/api/v1/produtos/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatedProduto),
+          });
+          if (res.ok) {
+            showToast(`"${updatedProduto.nome}" atualizado com sucesso!`, 'success');
+            carregarProdutos();
+            exibirForm();
+          } else {
+            const erro = await res.json().catch(() => ({}));
+            const msg  = erro.detail || erro.message || `Erro ${res.status}`;
+            showToast(msg, 'error');
+          }
+        } catch (err) {
+          console.error('[Maré API] Erro de rede:', err);
+          showToast('Sem conexão com a API. Verifique se está online.', 'error');
+        }
+      });
 
+    }
+
+    function exibirForm(){
+      const container = document.getElementById('produtoForm');
+      container.innerHTML = ` <form id="produtoForm" novalidate>
+
+          <div class="field">
+            <label for="nome">Nome do Produto *</label>
+            <input type="text" id="nome" placeholder="Ex: Moqueca de Camarão" required />
+            <div class="slug-preview" id="slugPreview">
+              URL: <span>/produto/<span id="slugVal">—</span></span>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+            <div class="field">
+              <label for="preco">Preço (R$) *</label>
+              <input type="number" id="preco" placeholder="0.00" step="0.01" min="0.01" required />
+            </div>
+            <div class="field">
+              <label for="categoria">Categoria *</label>
+              <select id="categoria" required>
+                <option value="" disabled selected>Selecione</option>
+                <option value="MOQUECAS">Moquecas</option>
+                <option value="FRUTOS_DO_MAR">Frutos do Mar</option>
+                <option value="ENTRADAS">Entradas</option>
+                <option value="ACOMPANHAMENTOS">Acompanhamentos</option>
+                <option value="BEBIDAS">Bebidas</option>
+                <option value="SOBREMESAS">Sobremesas</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="descricao">Descrição</label>
+            <textarea id="descricao" placeholder="Descreva o prato, ingredientes, modo de preparo..."></textarea>
+          </div>
+
+          <div class="field">
+            <label>Imagem do Produto</label>
+            <div class="img-preview-wrap" id="imgPreviewWrap">
+              <div class="img-preview-placeholder">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <rect x="3" y="3" width="18" height="18" rx="3"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <polyline points="21 15 16 10 5 21"/>
+                </svg>
+                <p>Cole a URL da imagem abaixo</p>
+              </div>
+              <img id="imgPreview" alt="Preview" />
+            </div>
+            <input type="url" id="imagem" placeholder="https://exemplo.com/foto.jpg" />
+          </div>
+
+          <div class="field">
+            <label>Tags</label>
+            <div class="tags-input-wrap" id="tagsWrap">
+              <input class="tags-input" id="tagsInput" placeholder="Digite e pressione Enter..." />
+            </div>
+            <p style="font-size:0.72rem; color:var(--text-muted); margin-top:0.25rem;">
+              Ex: vegano, sem_gluten, picante
+            </p>
+          </div>
+
+          <div class="toggle-row" onclick="toggleDisponivel()">
+            <span class="toggle-label-text">Disponível no cardápio</span>
+            <label class="toggle" onclick="event.stopPropagation()">
+              <input type="checkbox" id="disponivel" checked onchange="void(0)" />
+              <div class="toggle-track"></div>
+              <div class="toggle-thumb"></div>
+            </label>
+          </div>
+
+          <button type="submit" class="btn-submit" id="submitBtn">
+            <div class="spinner" id="spinner"></div>
+            <svg id="submitIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            <span id="submitText">Adicionar Produto</span>
+          </button>
+
+        </form>`;
     }
 
     // ── INIT ──────────────────────────────────────────────────────────────────
