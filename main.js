@@ -349,7 +349,6 @@
             <label for="descricao">Descrição</label>
             <textarea id="descricao" placeholder="Descreva o prato, ingredientes, modo de preparo..."></textarea>
           </div>
-
           <div class="field">
             <label>Imagem do Produto</label>
             <div class="img-preview-wrap" id="imgPreviewWrap">
