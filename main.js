@@ -9,42 +9,56 @@
         .replace(/\s+/g, '-');
     }
 
-    document.getElementById('nome').addEventListener('input', (e) => {
-      const slug = gerarSlug(e.target.value);
-      document.getElementById('slugVal').textContent = slug || '—';
-    });
+    function bindFormInputs() {
+      const nomeInput = document.getElementById('nome');
+      const imagemInput = document.getElementById('imagem');
+      const tagsInput = document.getElementById('tagsInput');
+
+      if (nomeInput) {
+        nomeInput.addEventListener('input', (e) => {
+          const slug = gerarSlug(e.target.value);
+          const slugVal = document.getElementById('slugVal');
+          if (slugVal) slugVal.textContent = slug || '—';
+        });
+      }
+
+      if (imagemInput) {
+        imagemInput.addEventListener('input', (e) => {
+          const url = e.target.value.trim();
+          const img = document.getElementById('imgPreview');
+          const wrap = document.getElementById('imgPreviewWrap');
+          if (url) {
+            if (img) img.src = url;
+            if (img) img.style.display = 'block';
+            if (wrap) wrap.classList.add('has-image');
+            if (img) img.onerror = () => {
+              img.style.display = 'none';
+              wrap.classList.remove('has-image');
+            };
+          } else {
+            if (img) img.style.display = 'none';
+            if (wrap) wrap.classList.remove('has-image');
+          }
+        });
+      }
+
+      if (tagsInput) {
+        tagsInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ',') {
+            e.preventDefault();
+            const val = e.target.value.trim().replace(/,/g, '').replace(/\s+/g, '_').toLowerCase();
+            if (val && !tags.includes(val)) {
+              tags.push(val);
+              renderTags();
+            }
+            e.target.value = '';
+          }
+        });
+      }
+    }
 
     // ── Image preview ─────────────────────────────────────────────────────────
-    document.getElementById('imagem').addEventListener('input', (e) => {
-      const url = e.target.value.trim();
-      const img = document.getElementById('imgPreview');
-      const wrap = document.getElementById('imgPreviewWrap');
-      if (url) {
-        img.src = url;
-        img.style.display = 'block';
-        wrap.classList.add('has-image');
-        img.onerror = () => {
-          img.style.display = 'none';
-          wrap.classList.remove('has-image');
-        };
-      } else {
-        img.style.display = 'none';
-        wrap.classList.remove('has-image');
-      }
-    });
-
     // ── Tags ──────────────────────────────────────────────────────────────────
-    document.getElementById('tagsInput').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ',') {
-        e.preventDefault();
-        const val = e.target.value.trim().replace(/,/g, '').replace(/\s+/g, '_').toLowerCase();
-        if (val && !tags.includes(val)) {
-          tags.push(val);
-          renderTags();
-        }
-        e.target.value = '';
-      }
-    });
 
     function renderTags() {
       const wrap = document.getElementById('tagsWrap');
@@ -96,11 +110,11 @@
     }
 
     // ── SUBMIT ────────────────────────────────────────────────────────────────
-    document.getElementById('produtoForm').addEventListener('submit', async (e) => {
+    async function handleSubmit(e) {
       e.preventDefault();
 
-      const nome     = document.getElementById('nome').value.trim();
-      const preco    = parseFloat(document.getElementById('preco').value);
+      const nome = document.getElementById('nome').value.trim();
+      const preco = parseFloat(document.getElementById('preco').value);
       const categoria = document.getElementById('categoria').value;
 
       if (!nome || !preco || !categoria) {
@@ -157,7 +171,7 @@
       } finally {
         setLoading(false);
       }
-    });
+    }
 
     // ── LISTAR PRODUTOS ────────────────────────────────────────────────────────
     async function carregarProdutos() {
@@ -393,10 +407,11 @@
           </button>
 
         </form>`;
-        document.getElementById('produtoForm').addEventListener('submit', async (e) => {
-          e.preventDefault();
-          
-        });
+        const form = document.getElementById('produtoForm');
+        if (form) {
+          form.addEventListener('submit', handleSubmit);
+        }
+        bindFormInputs();
 
     }
 
