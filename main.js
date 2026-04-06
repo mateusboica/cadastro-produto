@@ -58,6 +58,32 @@
     }
 
     // ── Image preview ─────────────────────────────────────────────────────────
+
+    async function uploadParaImgBB(arquivo) {
+    const formData = new FormData();
+    formData.append('image', arquivo);
+
+    try {
+        const response = await fetch(`https://api.imgbb.com/1/upload?key=key`, {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            return data.data.url; 
+        } else {
+            console.error('Erro ImgBB:', data.error);
+            return null;
+        }
+    } catch (error) {
+        console.error('Erro de conexão com ImgBB:', error);
+        return null;
+    }
+}
+
+
     // ── Tags ──────────────────────────────────────────────────────────────────
 
     function renderTags() {
@@ -114,6 +140,9 @@
       e.preventDefault();
 
       const nome = document.getElementById('nome').value.trim();
+      const imgFile = document.getElementById("imagem")
+      const arquivo = imgFile.files[0];
+      let imgUrl = null;
       const preco = parseFloat(document.getElementById('preco').value);
       const categoria = document.getElementById('categoria').value;
 
@@ -122,12 +151,22 @@
         return;
       }
 
+      if (arquivo) {  
+        showToast('Fazendo upload da imagem...', 'success');
+        imgUrl = await uploadParaImgBB(arquivo);
+        if (!imgUrl) {
+          showToast('Falha no upload da imagem. Tente novamente.', 'error');
+          return;
+        }
+      }
+
+
       const produto = {
         nome,
         slug:        gerarSlug(nome),
         preco,
         descricao:   document.getElementById('descricao').value.trim(),
-        img:         document.getElementById('imagem').value.trim() || null,
+        img:         imgUrl || null,
         categoria,
         isDisponivel: document.getElementById('disponivel').checked,
         tags,
