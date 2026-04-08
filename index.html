@@ -1,60 +1,12 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Maré Artisanal — Painel Admin</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
-  <script src="main.js" defer></script>
-</head>
-<body>
-
-  <header>
-    <span class="logo">Delícia Potiguar</span>
-    <span class="header-badge">Gerenciador</span>
-  </header>
-
-  <div class="page">
-
-    <!-- ── FORM ── -->
-    <aside>
-      <div class="form-card">
-        <div class="form-card-header">
-          <h2>Novo Produto</h2>
-          <p>Preencha os campos para adicionar ao cardápio</p>
-        </div>
-        <div id="form-body">
-
-        </div>
-      </div>
-    </aside>
-
-    <!-- ── PRODUCTS PANEL ── -->
-    <section class="products-panel">
-      <div class="panel-header">
-        <h2>Cardápio</h2>
-        <span class="count-badge" id="countBadge">0 produtos</span>
-      </div>
-      <div class="product-grid" id="productGrid">
-        ${[1,2,3,4,5,6].map(() => `
-          <div class="skeleton-card">
-            <div class="skeleton" style="height:165px;border-radius:0"></div>
-            <div style="padding:0.875rem 1rem;display:flex;flex-direction:column;gap:0.5rem">
-              <div class="skeleton" style="height:14px;width:70%"></div>
-              <div class="skeleton" style="height:12px;width:40%"></div>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    </section>
-
-  </div>
-
-  <!-- TOAST -->
-  <div id="toast">
-    <div class="toast-icon" id="toastIcon"></div>
-    <span id="toastMsg"></span>
-  </div>
-</body>
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Delícia Potiguar — Painel Admin</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
