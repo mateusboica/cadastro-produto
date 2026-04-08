@@ -32,7 +32,7 @@ function LoginPage() {
       <section className="login-shell">
         <div className="login-brand">
           <span className="login-badge">Acesso administrativo</span>
-          <h1>Delicia Potiguar</h1>
+          <h1>Delícia Potiguar</h1>
           <p>
             Entre com suas credenciais para acessar o painel e gerenciar os
             produtos do cardapio.
