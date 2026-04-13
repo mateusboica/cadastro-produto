@@ -1,24 +1,33 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import './login.css'
+import { Link } from 'react-router-dom'
+import '../login.css'
 
-function LoginPage() {
+function RegisterPage() {
+  const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
+  const [confirmarSenha, setConfirmarSenha] = useState('')
   const [carregando, setCarregando] = useState(false)
   const [erro, setErro] = useState('')
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setCarregando(true)
     setErro('')
 
+    if (senha !== confirmarSenha) {
+      setErro('As senhas nao coincidem.')
+      return
+    }
+
+    setCarregando(true)
+
     try {
-      console.log('Enviando dados:', { email, senha })
+      console.log('Registrando usuario:', { nome, email, senha })
       await new Promise((resolve) => setTimeout(resolve, 2000))
-      alert('Login bem sucedido!')
+      alert('Cadastro realizado com sucesso!')
     } catch {
-      setErro('Falha ao entrar. Verifique seus dados.')
+      setErro('Nao foi possivel concluir o cadastro. Tente novamente.')
     } finally {
       setCarregando(false)
     }
@@ -31,21 +40,33 @@ function LoginPage() {
 
       <section className="login-shell">
         <div className="login-brand">
-          <span className="login-badge">Acesso administrativo</span>
-          <h1>Delícia Potiguar</h1>
+          <span className="login-badge">Criacao de conta</span>
+          <h1>Delicia Potiguar</h1>
           <p>
-            Entre com suas credenciais para acessar o painel e gerenciar os
-            produtos do cardapio.
+            Cadastre um novo acesso administrativo para acompanhar pedidos,
+            atualizar produtos e manter o cardapio sempre pronto.
           </p>
         </div>
 
         <div className="login-card">
           <div className="login-card-header">
-            <h2>Login</h2>
-            <p>Use seu e-mail e senha para continuar.</p>
+            <h2>Registro</h2>
+            <p>Preencha os dados abaixo para criar sua conta.</p>
           </div>
 
           <form onSubmit={handleSubmit} className="login-form">
+            <div className="field">
+              <label htmlFor="nome">Nome completo</label>
+              <input
+                id="nome"
+                type="text"
+                placeholder="Seu nome"
+                value={nome}
+                onChange={(event) => setNome(event.target.value)}
+                required
+              />
+            </div>
+
             <div className="field">
               <label htmlFor="email">Email</label>
               <input
@@ -63,9 +84,21 @@ function LoginPage() {
               <input
                 id="senha"
                 type="password"
-                placeholder="Digite sua senha"
+                placeholder="Crie uma senha"
                 value={senha}
                 onChange={(event) => setSenha(event.target.value)}
+                required
+              />
+            </div>
+
+            <div className="field">
+              <label htmlFor="confirmarSenha">Confirmar senha</label>
+              <input
+                id="confirmarSenha"
+                type="password"
+                placeholder="Repita sua senha"
+                value={confirmarSenha}
+                onChange={(event) => setConfirmarSenha(event.target.value)}
                 required
               />
             </div>
@@ -78,8 +111,12 @@ function LoginPage() {
               disabled={carregando}
             >
               {carregando && <span className="spinner"></span>}
-              <span>{carregando ? 'Entrando...' : 'Entrar'}</span>
+              <span>{carregando ? 'Criando conta...' : 'Criar conta'}</span>
             </button>
+
+            <p className="login-switch">
+              Ja possui conta? <Link to="/login">Fazer login</Link>
+            </p>
           </form>
         </div>
       </section>
@@ -87,4 +124,4 @@ function LoginPage() {
   )
 }
 
-export default LoginPage
+export default RegisterPage
