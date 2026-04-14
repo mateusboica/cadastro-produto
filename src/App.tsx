@@ -1,28 +1,11 @@
 import { useEffect, useState } from 'react'
 import type { ChangeEvent, FormEvent, KeyboardEvent } from 'react'
+import imageService from './api/imageService'
+import productService from './api/productService'
 import './styles.css'
-
-const API = import.meta.env.VITE_API_URL
-const IMGBB_KEY = import.meta.env.VITE_IMGBB_KEY
-
-
-const CATEGORY_LABELS: Record<string, string> = {
-  MOQUECAS: 'Moquecas',
-  FRUTOS_DO_MAR: 'Frutos do Mar',
-  ENTRADAS: 'Entradas',
-  ACOMPANHAMENTOS: 'Acomp.',
-  BEBIDAS: 'Bebidas',
-  SOBREMESAS: 'Sobremesas',
-}
-
-const CATEGORY_OPTIONS = [
-  { value: 'MOQUECAS', label: 'Moquecas' },
-  { value: 'FRUTOS_DO_MAR', label: 'Frutos do Mar' },
-  { value: 'ENTRADAS', label: 'Entradas' },
-  { value: 'ACOMPANHAMENTOS', label: 'Acompanhamentos' },
-  { value: 'BEBIDAS', label: 'Bebidas' },
-  { value: 'SOBREMESAS', label: 'Sobremesas' },
-] as const
+import { CATEGORY_LABELS } from './features/products/constants'
+import { CATEGORY_OPTIONS } from './features/products/constants'
+import type { FormState } from './features/products/types'
 
 type ToastType = 'success' | 'error'
 
@@ -42,17 +25,6 @@ type Product = {
   isDisponivel?: boolean
   disponivel?: boolean
   tags?: string[]
-}
-
-type FormState = {
-  nome: string
-  preco: string
-  categoria: string
-  descricao: string
-  isDisponivel: boolean
-  tags: string[]
-  imageFile: File | null
-  existingImage: string | null
 }
 
 const emptyFormState = (): FormState => ({
@@ -81,20 +53,8 @@ function formatCategoria(categoria: string) {
 }
 
 async function uploadParaImgBB(arquivo: File) {
-  const formData = new FormData()
-  formData.append('image', arquivo)
-
   try {
-    const response = await fetch(
-      `https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`,
-      {
-        method: 'POST',
-        body: formData,
-      },
-    )
-
-    const data = await response.json()
-    return data.success ? data.data.url : null
+    return await imageService.upload(arquivo)
   } catch (error) {
     console.error('Erro de conexão com ImgBB:', error)
     return null
@@ -149,9 +109,8 @@ function App() {
     setProductsError(false)
 
     try {
-      const response = await fetch(`${API}/api/v1/produtos?size=50`)
-      const data = await response.json()
-      setProducts(data.content || [])
+      const productList = await productService.list()
+      setProducts(productList)
     } catch (error) {
       console.error('Erro ao carregar produtos:', error)
       setProducts([])
@@ -260,38 +219,13 @@ function App() {
       tags: form.tags,
     }
 
-    const endpoint = editingProductId
-      ? `${API}/api/v1/produtos/${editingProductId}`
-      : `${API}/api/v1/produtos`
-    const method = editingProductId ? 'PUT' : 'POST'
-
     setIsSubmitting(true)
 
     try {
-      const response = await fetch(endpoint, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(productPayload),
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        const message =
-          errorData.detail ||
-          errorData.message ||
-          `Erro ${response.status}`
-
-        if (errorData.campos) {
-          const campos = Object.entries(errorData.campos)
-            .map(([campo, valor]) => `${campo}: ${valor}`)
-            .join(', ')
-
-          showToast(`Campos inválidos -> ${campos}`, 'error')
-        } else {
-          showToast(message, 'error')
-        }
-
-        return
+      if (editingProductId) {
+        await productService.update(editingProductId, productPayload)
+      } else {
+        await productService.create(productPayload)
       }
 
       showToast(
@@ -303,8 +237,36 @@ function App() {
       resetForm()
       await carregarProdutos()
     } catch (error) {
+      const apiError = error as {
+        response?: {
+          status?: number
+          data?: {
+            detail?: string
+            message?: string
+            campos?: Record<string, string>
+          }
+        }
+      }
+
+      const errorData = apiError.response?.data
+      const message =
+        errorData?.detail ||
+        errorData?.message ||
+        (apiError.response?.status
+          ? `Erro ${apiError.response.status}`
+          : 'Sem conexão com a API. Verifique se está online.')
+
       console.error('Erro de rede:', error)
-      showToast('Sem conexão com a API. Verifique se está online.', 'error')
+
+      if (errorData?.campos) {
+        const campos = Object.entries(errorData.campos)
+          .map(([campo, valor]) => `${campo}: ${valor}`)
+          .join(', ')
+
+        showToast(`Campos inválidos -> ${campos}`, 'error')
+      } else {
+        showToast(message, 'error')
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -335,14 +297,7 @@ function App() {
     }
 
     try {
-      const response = await fetch(`${API}/api/v1/produtos/${product.id}`, {
-        method: 'DELETE',
-      })
-
-      if (!response.ok && response.status !== 204) {
-        showToast('Erro ao remover produto.', 'error')
-        return
-      }
+      await productService.remove(product.id)
 
       showToast(`"${product.nome}" removido.`, 'success')
       await carregarProdutos()
