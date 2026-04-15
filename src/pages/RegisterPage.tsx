@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link } from 'react-router-dom'
+import registerService from '../api/registerService'
 import '../login.css'
 
 function RegisterPage() {
@@ -23,13 +24,18 @@ function RegisterPage() {
     setCarregando(true)
 
     try {
-      console.log('Registrando usuario:', { nome, email, senha })
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-      alert('Cadastro realizado com sucesso!')
-    } catch {
-      setErro('Nao foi possivel concluir o cadastro. Tente novamente.')
-    } finally {
-      setCarregando(false)
+      await registerService.register(nome, email, senha)
+      alert('Conta criada com sucesso! Agora voce pode fazer login.')
+      setNome('')
+      setEmail('')
+      setSenha('')
+      setConfirmarSenha('')
+      } catch (error) {
+        console.error('Erro ao criar conta:', error)
+        setErro('Ocorreu um erro ao criar a conta. Tente novamente mais tarde.')
+      } finally {
+        setCarregando(false)
+
     }
   }
 
