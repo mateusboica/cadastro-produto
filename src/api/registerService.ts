@@ -1,11 +1,11 @@
 import api from './api';
 
 const registerService = {
-    register: async (name: string, email: string, password: string) => {
-        const response = await api.post('/register', { name, email, password });
+    register: async (nome: string, email: string, senha: string) => {
+        const response = await api.post('/api/v1/auth/register', { nome, email, senha});
         return response.data;
     }
 
 };
 
-export default registerService;
+export default registerService; 
