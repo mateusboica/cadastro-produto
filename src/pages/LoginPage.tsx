@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link } from 'react-router-dom'
+import authService from '../api/authService'
 import '../login.css'
 
 function LoginPage() {
@@ -15,9 +16,12 @@ function LoginPage() {
     setErro('')
 
     try {
-      console.log('Enviando dados:', { email, senha })
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-      alert('Login bem sucedido!')
+      const response = await authService.login(email, senha)
+      if (response && typeof response === 'object' && 'status' in response && response.status === 200) {
+        window.location.href = '/'
+      } else {
+        setErro('Falha ao entrar. Verifique seus dados.')
+      }
     } catch {
       setErro('Falha ao entrar. Verifique seus dados.')
     } finally {
