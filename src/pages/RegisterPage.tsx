@@ -17,7 +17,7 @@ function RegisterPage() {
     setErro('')
 
     if (senha !== confirmarSenha) {
-      setErro('As senhas nao coincidem.')
+      setErro('As senhas não coincidem.')
       return
     }
 
