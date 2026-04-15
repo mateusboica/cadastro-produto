@@ -25,6 +25,7 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<A
       ...(options.headers || {}),
     },
     ...options,
+    credentials: 'include',
   })
 
   const data = await response.json().catch(() => null)
