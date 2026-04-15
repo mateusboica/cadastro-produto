@@ -16,12 +16,8 @@ function LoginPage() {
     setErro('')
 
     try {
-      const response = await authService.login(email, senha)
-      if (response && typeof response === 'object' && 'status' in response && response.status === 200) {
-        window.location.href = '/'
-      } else {
-        setErro('Falha ao entrar. Verifique seus dados.')
-      }
+      await authService.login(email, senha)
+      window.location.href = '/'
     } catch {
       setErro('Falha ao entrar. Verifique seus dados.')
     } finally {
