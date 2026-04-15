@@ -18,8 +18,10 @@ function LoginPage() {
     try {
       await authService.login(email, senha)
       window.location.href = '/'
-    } catch {
-      setErro('Falha ao entrar. Verifique seus dados.')
+    } catch (error) {
+      if (error instanceof Error) {
+        setErro(error.message)
+      }
     } finally {
       setCarregando(false)
     }
