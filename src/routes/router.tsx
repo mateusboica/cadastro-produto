@@ -13,7 +13,7 @@ export default function Router() {
   useEffect(() => {
     async function validarSessao() {
       try {
-        await api.get('/usuario/me');
+        await api.get('/api/v1/auth/me');
         setUsuarioLogado(true);
       } catch (error) {
         setUsuarioLogado(false);
