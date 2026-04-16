@@ -30,7 +30,9 @@ type ProductListResponse = {
 
 const productService = {
   list: async (): Promise<Product[]> => {
-    const response = await api.get<ProductListResponse>('/v1/produtos?size=50')
+    const response = await api.get<ProductListResponse>('/v1/produtos?size=50', {
+      headers: { Authorization: `Bearer ${cookieStore.get('token')}` }
+    })
     return response.data?.content || []
   },
 
