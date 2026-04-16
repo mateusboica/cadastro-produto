@@ -27,10 +27,10 @@ export default function Router() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
 
       <Route element={<RotasPrivadas usuarioLogado={usuarioLogado} carregando={carregando} />}>
-        <Route path="/produtos" element={<App />} />
-        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/" element={<App />} />
       </Route>
     </Routes>
   )
