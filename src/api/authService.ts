@@ -6,6 +6,16 @@ const authService = {
 
         return response.data;
 
+    },
+
+    getEmail: async () => {
+        const response = await api.get('/api/v1/auth/me');
+        return response.data;
+    },
+
+    getNome: async () => {
+        const response = await api.get('/api/v1/auth/me-nome');
+        return response.data;
     }
 
 };
