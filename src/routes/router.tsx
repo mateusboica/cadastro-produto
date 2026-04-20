@@ -15,7 +15,7 @@ export default function Router() {
       try {
         await api.get('/api/v1/auth/me');
         setUsuarioLogado(true);
-      } catch (error) {
+      } catch {
         setUsuarioLogado(false);
       } finally {
         setCarregando(false);
