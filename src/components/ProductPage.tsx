@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import type { ChangeEvent, FormEvent, KeyboardEvent } from 'react'
+import { useOutletContext } from 'react-router-dom'
 import imageService from '../api/imageService'
 import productService, { type Product } from '../api/productService'
-import type { FormState, ProductApiError, ToastType } from '../features/products/types'
+import type { AppOutletContext } from '../App'
+import type { FormState, ProductApiError } from '../features/products/types'
 import {
   createEditableFormState,
   createProductPayload,
@@ -12,10 +14,6 @@ import {
 } from '../features/products/utils'
 import ProductForm from './ProductForm'
 import ProductList from './ProductList'
-
-type ProductPageProps = {
-  showToast: (message: string, type?: ToastType) => void
-}
 
 const emptyFormState = (): FormState => ({
   nome: '',
@@ -37,7 +35,8 @@ async function uploadParaImgBB(arquivo: File) {
   }
 }
 
-export default function ProductPage({ showToast }: ProductPageProps) {
+export default function ProductPage() {
+  const { showToast } = useOutletContext<AppOutletContext>()
   const [products, setProducts] = useState<Product[]>([])
   const [isLoadingProducts, setIsLoadingProducts] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
