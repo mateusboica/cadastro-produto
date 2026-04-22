@@ -1,5 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
-import authService from '../api/authService'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { NavLink } from 'react-router-dom'
+import useAuthContext from '../api/authContext'
+import { gerarCorAleatoria } from '../features/products/utils'
 
 type HeaderProps = {
   theme: 'dark' | 'light'
@@ -8,9 +10,12 @@ type HeaderProps = {
 
 export default function Header({ theme, onToggleTheme }: HeaderProps) {
   const [userOptionsOpen, setUserOptionsOpen] = useState(false)
-  const [email, setEmail] = useState('Carregando...')
-  const [nome, setNome] = useState('Usuario')
+  const { nome, email } = useAuthContext()
   const userMenuRef = useRef<HTMLDivElement | null>(null)
+  const avatarColor = useMemo(
+    () => (email === 'Carregando...' ? '383838' : gerarCorAleatoria(nome)),
+    [email, nome],
+  )
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -35,20 +40,6 @@ export default function Header({ theme, onToggleTheme }: HeaderProps) {
       document.removeEventListener('mousedown', handleClickOutside)
       document.removeEventListener('keydown', handleEscape)
     }
-  }, [])
-
-  useEffect(() => {
-    authService
-      .getUser()
-      .then((user) => {
-        setEmail(user.email.trim() || 'Conta')
-        setNome(user.nome.trim() || 'Usuario')
-      })
-      .catch((error) => {
-        console.error('Erro ao buscar usuario:', error)
-        setEmail('Conta')
-        setNome('Usuario')
-      })
   }, [])
 
   function handleLogout() {
@@ -87,7 +78,7 @@ export default function Header({ theme, onToggleTheme }: HeaderProps) {
             onClick={() => setUserOptionsOpen((open) => !open)}
           >
             <img
-              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(nome)}&background=2c2c2c&color=fff`}
+              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(nome)}&background=${avatarColor}&color=fff`}
               alt="Perfil do usuario"
             />
             <div className="user-options-text">
@@ -135,7 +126,9 @@ export default function Header({ theme, onToggleTheme }: HeaderProps) {
                   <path d="M12 20h9" />
                   <path d="M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4L16.5 3.5z" />
                 </svg>
-                <span>Editar conta</span>
+                <NavLink key="editar-conta" to="/editar-conta" style={({ textDecoration: "none" })}>
+                  <span>Editar Conta</span>
+                </NavLink>
               </button>
 
               <button

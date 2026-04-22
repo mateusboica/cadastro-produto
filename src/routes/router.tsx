@@ -81,7 +81,7 @@ export default function Router() {
             }
             // Rotas de usuuario
             />
-            <Route path="/editar-perfil"
+            <Route path="/editar-conta"
              element={<EditAccount />}/> 
 
         </Route>

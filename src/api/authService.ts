@@ -15,6 +15,7 @@ const authService = {
     const response = await api.get<User>('/api/v1/auth/me')
     return response.data
   },
+
 }
 
 export default authService

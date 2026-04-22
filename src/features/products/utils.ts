@@ -12,6 +12,18 @@ export function gerarSlug(nome: string) {
     .replace(/\s+/g, '-')
 }
 
+export function gerarCorAleatoria(nomeUsuario: string) {
+  const [nome = 'Usuario'] = nomeUsuario.trim().split(' ')
+  let hash = 0
+
+  for (let i = 0; i < nome.length; i++) {
+    hash = nome.charCodeAt(i) + ((hash << 5) - hash)
+  }
+
+  const cor = (hash & 0x00ffffff).toString(16).toUpperCase()
+  return `00000${cor}`.slice(-6)
+}
+
 export function formatCategoria(categoria: string) {
   return CATEGORY_LABELS[categoria] || categoria
 }
