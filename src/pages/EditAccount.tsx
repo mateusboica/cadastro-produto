@@ -1,13 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { useOutletContext } from "react-router-dom";
+import { notifyAuthUpdated } from "../api/authContext";
 import useAuthContext from "../api/authContext";
 import type { AppOutletContext } from "../App";
 import { gerarCorAleatoria } from "../features/products/utils";
+import accountService from "../api/accountService";
+import { useNavigate } from "react-router-dom";
 
 function EditAccount() {
   const { nome, email } = useAuthContext();
+  const [senhaAtual, setSenhaAtual] = useState('')
+  const [novaSenha, setNovaSenha] = useState('')
   const { showToast } = useOutletContext<AppOutletContext>();
+  const navigate = useNavigate();
+  const [carregando, setCarregando] = useState(false);
   const [form, setForm] = useState({
     nome: "",
     email: "",
@@ -26,12 +33,41 @@ function EditAccount() {
     }));
   }, [nome, email]);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    showToast("Dados da conta prontos para salvar.", "success");
+
+    if (form.nome == nome && form.email == email) {
+      showToast("Nenhuma alteracao foi feita nos dados da conta.", "error");
+      return;
+    }
+
+    else {
+      try {
+        await accountService.editAccount(form.email, form.nome);
+        notifyAuthUpdated();
+        showToast("Dados da conta atualizados com sucesso.", "success");
+      } catch (error) {
+        console.log(error);
+        showToast("Erro ao atualizar os dados da conta.", "error");
+      }
+    }
   }
 
+  async function handlePasswordSubmit(event: FormEvent<HTMLFormElement>) {
+    event?.preventDefault();
+    try {
+      setCarregando(true);
+      await accountService.editSenha(senhaAtual, novaSenha);
+      showToast("Senha atualizada com sucesso.", "success");
+      setSenhaAtual('');
+      setNovaSenha('');
+    } catch (error) {
+      console.log(error)
+      showToast("Erro ao atualizar a senha.", "error");
+    } finally {
+      setCarregando(false);
+    }
+  }
   return (
     <section className="account-page">
       <div className="account-hero">
@@ -108,6 +144,7 @@ function EditAccount() {
             <button
               className="btn-cancel account-secondary-action"
               type="button"
+              onClick={() => navigate('/produtos')}
             >
               <span className="material-symbols-outlined" aria-hidden="true">
                 close
@@ -123,44 +160,51 @@ function EditAccount() {
           </div>
         </form>
 
-        <aside className="account-side-panel">
-          <div className="account-panel-header">
-            <span className="material-symbols-outlined" aria-hidden="true">
-              lock
-            </span>
-            <div>
-              <h2>Seguranca</h2>
-              <p>Configure uma nova senha quando precisar reforcar o acesso.</p>
+        <form className="account-panel" onSubmit={handlePasswordSubmit}>
+          <aside className="account-side-panel">
+            <div className="account-panel-header">
+              <span className="material-symbols-outlined" aria-hidden="true">
+                lock
+              </span>
+              <div>
+                <h2>Seguranca</h2>
+                <p>Configure uma nova senha quando precisar reforcar o acesso.</p>
+              </div>
             </div>
-          </div>
 
-          <div className="field">
-            <label htmlFor="currentPassword">Senha atual</label>
-            <input
-              id="currentPassword"
-              type="password"
-              placeholder="Digite sua senha atual"
-            />
-          </div>
+            <div className="field">
+              <label htmlFor="senhaAtual">Senha atual</label>
+              <input
+                id="senhaAtual"
+                type="password"
+                placeholder="Digite sua senha atual"
+                value={senhaAtual}
+                onChange={event => setSenhaAtual(event.target.value)}
+              />
+            </div>
 
-          <div className="field">
-            <label htmlFor="newPassword">Nova senha</label>
-            <input
-              id="newPassword"
-              type="password"
-              placeholder="Digite a nova senha"
-            />
-          </div>
+            <div className="field">
+              <label htmlFor="novaSenha">Nova senha</label>
+              <input
+                id="novaSenha"
+                type="password"
+                placeholder="Digite a nova senha"
+                value={novaSenha}
+                onChange={ (event) => setNovaSenha(event.target.value) }
+              />
+            </div>
 
-          <button className="account-password-action" type="button">
-            <span className="material-symbols-outlined" aria-hidden="true">
-              key
-            </span>
-            Atualizar senha
-          </button>
-        </aside>
+            <button className="account-password-action" type="submit" disabled={carregando}>
+               {carregando && <span className="spinner"></span>}
+              <span>{carregando ? 'Atualizando...' : 'Atualizar senha'}</span>
+              <span className="material-symbols-outlined" aria-hidden="true">
+                key
+              </span>
+            </button>
+          </aside>
+           </form>
       </div>
-    </section>
+    </section >
   );
 }
 

@@ -39,7 +39,7 @@ function App() {
 
     const timer = window.setTimeout(() => {
       setToast(null)
-    }, 3500)
+    }, 5500)
 
     return () => window.clearTimeout(timer)
   }, [toast])

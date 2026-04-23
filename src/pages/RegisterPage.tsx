@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link } from 'react-router-dom'
+import DeveloperSignature from '../components/DeveloperSignature'
 import registerService from '../api/registerService'
 import '../login.css'
 
@@ -125,6 +126,8 @@ function RegisterPage() {
             </p>
           </form>
         </div>
+
+        <DeveloperSignature className="login-signature" />
       </section>
     </main>
   )

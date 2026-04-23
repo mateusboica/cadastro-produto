@@ -105,7 +105,8 @@ body {
 .sidebar-brand {
   display: flex;
   align-items: center;
-  gap: 0.65rem;;
+  gap: 0.65rem;
+  ;
   text-align: center;
 }
 
@@ -143,6 +144,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
+  flex: 1;
 }
 
 .sidebar-link {
@@ -214,6 +216,51 @@ body {
 
 .sidebar-link-text {
   min-width: 0;
+}
+
+.developer-signature {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  color: var(--text-muted);
+  font-size: 0.74rem;
+  line-height: 1.5;
+}
+
+.developer-signature-text {
+  color: var(--text-muted);
+}
+
+.developer-signature-text strong {
+  color: var(--text-sub);
+  font-weight: 700;
+}
+
+.developer-signature-links {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.developer-signature-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+
+.developer-signature-link:hover {
+  color: var(--primary);
+}
+
+.developer-signature-separator {
+  color: var(--text-muted);
+}
+
+.sidebar-signature {
+  margin-top: auto;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--border-soft);
 }
 
 .app-content {
@@ -331,7 +378,7 @@ body {
   display: grid;
   place-items: center;
   flex-shrink: 0;
-  border-radius: 18px;
+  border-radius: 999px;
   color: #fff;
   background: linear-gradient(135deg, var(--primary), var(--primary-dim));
   font-size: 1.1rem;
@@ -372,7 +419,7 @@ body {
   margin-bottom: 0.25rem;
 }
 
-.account-panel-header > .material-symbols-outlined {
+.account-panel-header>.material-symbols-outlined {
   width: 42px;
   height: 42px;
   display: inline-flex;
@@ -1749,19 +1796,20 @@ select option {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: #09090b; 
-  color: #ffffff;
+  background: var(--app-shell-bg);
+  color: var(--text);
   gap: 1.5rem;
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: "DM Sans", sans-serif;
 }
 
 .loading-spinner {
   width: 48px;
   height: 48px;
-  border: 4px solid #27272a; 
-  border-top-color: #ffffff; 
+  border: 4px solid var(--border-soft);
+  border-top-color: var(--primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
+  box-shadow: 0 10px 30px var(--shadow-soft);
 }
 
 /* A animação de giro */
@@ -1784,10 +1832,11 @@ select option {
   letter-spacing: 0.2em;
   text-transform: uppercase;
   margin: 0;
+  color: var(--text);
 }
 
 .loading-subtitle {
-  color: #a1a1aa;
+  color: var(--text-muted);
   font-size: 0.75rem;
   margin: 0;
 }

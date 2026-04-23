@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom'
+import DeveloperSignature from './DeveloperSignature'
 
 const menuItems = [
   { to: '/produtos', label: 'Produtos', description: 'Cadastro e cardapio', icon: 'inventory' },
@@ -38,6 +39,8 @@ export default function Sidebar() {
           </NavLink>
         ))}
       </nav>
+
+      <DeveloperSignature className="sidebar-signature" />
     </aside>
   )
 }

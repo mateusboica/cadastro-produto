@@ -43,6 +43,13 @@
   align-items: center;
 }
 
+.login-signature {
+  grid-column: 1 / -1;
+  justify-self: center;
+  margin-top: 0.25rem;
+  text-align: center;
+}
+
 .login-brand {
   display: flex;
   flex-direction: column;

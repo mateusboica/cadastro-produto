@@ -71,6 +71,13 @@ const api = {
 
   delete: <T>(path: string, options: RequestOptions = {}) =>
     request<T>(path, { ...options, method: 'DELETE' }),
+
+  patch: <T>(path: string, body: unknown, options: RequestOptions = {}) =>
+    request<T>(path, {
+      ...options,
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    }),
 }
 
 export default api

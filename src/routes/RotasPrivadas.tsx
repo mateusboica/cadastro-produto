@@ -6,9 +6,11 @@ interface RotasPrivadasProps {
 }
 
 export function RotasPrivadas({ usuarioLogado, carregando }: RotasPrivadasProps) {
+  const theme = localStorage.getItem('theme') === 'light' ? 'light' : 'dark'
+
   if (carregando) {
   return (
-    <div className="loading-container">
+    <div className="loading-container" data-theme={theme}>
       <div className="loading-spinner"></div>
       
       <div className="loading-text-wrapper">

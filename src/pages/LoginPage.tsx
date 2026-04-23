@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import authService from '../api/authService'
+import DeveloperSignature from '../components/DeveloperSignature'
 import '../login.css'
 
 function LoginPage() {
@@ -89,6 +90,7 @@ function LoginPage() {
             </p>
           </form>
         </div>
+        <DeveloperSignature className="login-signature" />
       </section>
     </main>
   )
