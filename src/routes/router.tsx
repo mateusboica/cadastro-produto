@@ -8,6 +8,7 @@ import RegisterPage from '../pages/RegisterPage'
 import SystemPlaceholderPage from '../pages/SystemPlaceholderPage'
 import { RotasPrivadas } from './RotasPrivadas'
 import EditAccount from '../pages/EditAccount'
+import EditLoja from '../pages/EditLoja'
 
 export default function Router() {
   const [carregando, setCarregando] = useState(true)
@@ -83,6 +84,9 @@ export default function Router() {
             />
             <Route path="/editar-conta"
              element={<EditAccount />}/> 
+
+             <Route path='/editar-loja'
+             element={<EditLoja />}/>
 
         </Route>
       </Route>

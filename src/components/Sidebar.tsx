@@ -6,6 +6,7 @@ const menuItems = [
   { to: '/pedidos', label: 'Pedidos', description: 'Acompanhar vendas', icon: 'shopping_cart' },
   { to: '/clientes', label: 'Clientes', description: 'Base de contatos', icon: 'people' },
   { to: '/relatorios', label: 'Relatorios', description: 'Resultados do negocio', icon: 'bar_chart' },
+  { to: '/editar-loja', label: 'Configurar Loja', description: 'Atualizar informações da loja', icon: 'store' },
   { to: '/configuracoes', label: 'Configuracoes', description: 'Preferencias do sistema', icon: 'settings' },
 ]
 
