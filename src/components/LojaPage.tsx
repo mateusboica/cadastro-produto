@@ -7,6 +7,7 @@ import type { AppOutletContext } from '../App'
 import type { LojaApiError, LojaFormState } from '../features/lojas/types'
 import {
   createEditableLojaFormState,
+  createDefaultHorarioFuncionamento,
   createLojaPayload,
   getLojaApiErrorMessage,
 } from '../features/lojas/utils'
@@ -23,7 +24,7 @@ const emptyFormState = (): LojaFormState => ({
   existingLogo: null,
   taxaServico: '',
   taxaEntrega: '',
-  horarioFuncionamento: '',
+  horarioFuncionamento: createDefaultHorarioFuncionamento(),
 })
 
 async function uploadParaImgBB(arquivo: File) {
@@ -106,18 +107,52 @@ export default function LojaPage() {
     }))
   }
 
+  function handleHorarioChange(
+    diaSemana: LojaFormState['horarioFuncionamento'][number]['diaSemana'],
+    field: 'ativo' | 'horaAbertura' | 'horaFechamento',
+    value: boolean | string,
+  ) {
+    setForm((current) => ({
+      ...current,
+      horarioFuncionamento: current.horarioFuncionamento.map((horario) =>
+        horario.diaSemana === diaSemana ? { ...horario, [field]: value } : horario,
+      ),
+    }))
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     const nome = form.nome.trim()
     const endereco = form.endereco.trim()
     const telefone = form.telefone.trim()
+    const descricao = form.descricao.trim()
     const taxaServico = Number.parseFloat(form.taxaServico)
     const taxaEntrega = Number.parseFloat(form.taxaEntrega)
-    const horarioFuncionamento = form.horarioFuncionamento.trim()
+    const horariosAtivos = form.horarioFuncionamento.filter((horario) => horario.ativo)
 
-    if (!nome || !endereco || !telefone || Number.isNaN(taxaServico) || Number.isNaN(taxaEntrega) || !horarioFuncionamento) {
+    if (
+      !nome ||
+      !descricao ||
+      !endereco ||
+      !telefone ||
+      Number.isNaN(taxaServico) ||
+      Number.isNaN(taxaEntrega) ||
+      horariosAtivos.length === 0
+    ) {
       showToast('Preencha os campos obrigatorios.', 'error')
+      return
+    }
+
+    const hasInvalidHorario = horariosAtivos.some(
+      (horario) =>
+        !horario.horaAbertura ||
+        !horario.horaFechamento ||
+        horario.horaFechamento <= horario.horaAbertura,
+    )
+
+    if (hasInvalidHorario) {
+      showToast('Confira os horarios: o fechamento deve ser depois da abertura.', 'error')
       return
     }
 
@@ -143,7 +178,7 @@ export default function LojaPage() {
     try {
       const lojaPayload = {
         ...createLojaPayload(form),
-        logoUrl: logoUrl || null,
+        logoUrl,
       }
 
       if (editingLojaId) {
@@ -216,6 +251,7 @@ export default function LojaPage() {
         onFieldChange={handleFieldChange}
         onLogoChange={handleLogoChange}
         onAbertoToggle={handleAbertoToggle}
+        onHorarioChange={handleHorarioChange}
         onResetForm={resetForm}
       />
 

@@ -1,15 +1,30 @@
 import api from './api'
 
+export type DiaSemana =
+    | 'MONDAY'
+    | 'TUESDAY'
+    | 'WEDNESDAY'
+    | 'THURSDAY'
+    | 'FRIDAY'
+    | 'SATURDAY'
+    | 'SUNDAY'
+
+export type HorarioFuncionamento = {
+    diaSemana: DiaSemana
+    horaAbertura: string
+    horaFechamento: string
+}
+
 export type LojaPayload = {
     nome: string
     endereco: string
     descricao: string
     telefone: string
     aberto: boolean
-    logoUrl: string | null
+    logoUrl: string
     taxaServico: number
     taxaEntrega: number
-    horarioFuncionamento: string
+    horarioFuncionamento: HorarioFuncionamento[]
 }
 
 export type Loja = {
@@ -24,7 +39,9 @@ export type Loja = {
     logo?: string | null
     taxaServico: number
     taxaEntrega: number
-    horarioFuncionamento: string
+    horarioFuncionamento: HorarioFuncionamento[]
+    createdAt?: string
+    updatedAt?: string
 }
 
 type LojaListResponse = {

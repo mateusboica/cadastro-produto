@@ -1,5 +1,6 @@
 import type { ChangeEvent, FormEvent } from 'react'
 import type { LojaFormState } from '../features/lojas/types'
+import { diasSemana } from '../features/lojas/utils'
 
 type LojaFormProps = {
   form: LojaFormState
@@ -12,6 +13,11 @@ type LojaFormProps = {
   ) => void
   onLogoChange: (event: ChangeEvent<HTMLInputElement>) => void
   onAbertoToggle: () => void
+  onHorarioChange: (
+    diaSemana: LojaFormState['horarioFuncionamento'][number]['diaSemana'],
+    field: 'ativo' | 'horaAbertura' | 'horaFechamento',
+    value: boolean | string,
+  ) => void
   onResetForm: () => void
 }
 
@@ -24,6 +30,7 @@ export default function LojaForm({
   onFieldChange,
   onLogoChange,
   onAbertoToggle,
+  onHorarioChange,
   onResetForm,
 }: LojaFormProps) {
   return (
@@ -79,7 +86,7 @@ export default function LojaForm({
           </div>
 
           <div className="field">
-            <label htmlFor="descricao">Descricao</label>
+            <label htmlFor="descricao">Descricao *</label>
             <textarea
               id="descricao"
               name="descricao"
@@ -122,20 +129,67 @@ export default function LojaForm({
           </div>
 
           <div className="field">
-            <label htmlFor="horarioFuncionamento">Horario de Funcionamento *</label>
-            <input
-              id="horarioFuncionamento"
-              name="horarioFuncionamento"
-              type="text"
-              placeholder="Ex: Seg-Sex: 08h-18h, Sab: 08h-12h"
-              value={form.horarioFuncionamento}
-              onChange={onFieldChange}
-              required
-            />
+            <label>Horario de Funcionamento *</label>
+            <div className="schedule-grid">
+              {form.horarioFuncionamento.map((horario) => {
+                const dia = diasSemana.find((item) => item.value === horario.diaSemana)
+
+                return (
+                  <div
+                    className={`schedule-row ${horario.ativo ? 'is-active' : ''}`}
+                    key={horario.diaSemana}
+                  >
+                    <label className="schedule-day">
+                      <input
+                        type="checkbox"
+                        checked={horario.ativo}
+                        onChange={(event) =>
+                          onHorarioChange(
+                            horario.diaSemana,
+                            'ativo',
+                            event.target.checked,
+                          )
+                        }
+                      />
+                      <span>{dia?.label ?? horario.diaSemana}</span>
+                    </label>
+
+                    <div className="schedule-times">
+                      <input
+                        type="time"
+                        aria-label={`${dia?.label ?? horario.diaSemana} abertura`}
+                        value={horario.horaAbertura}
+                        disabled={!horario.ativo}
+                        onChange={(event) =>
+                          onHorarioChange(
+                            horario.diaSemana,
+                            'horaAbertura',
+                            event.target.value,
+                          )
+                        }
+                      />
+                      <input
+                        type="time"
+                        aria-label={`${dia?.label ?? horario.diaSemana} fechamento`}
+                        value={horario.horaFechamento}
+                        disabled={!horario.ativo}
+                        onChange={(event) =>
+                          onHorarioChange(
+                            horario.diaSemana,
+                            'horaFechamento',
+                            event.target.value,
+                          )
+                        }
+                      />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
           </div>
 
           <div className="field">
-            <label htmlFor="logo">Logo da Loja</label>
+            <label htmlFor="logo">Logo da Loja *</label>
             <div className={`img-preview-wrap ${previewUrl ? 'has-image' : ''}`}>
               {!previewUrl && (
                 <div className="img-preview-placeholder">

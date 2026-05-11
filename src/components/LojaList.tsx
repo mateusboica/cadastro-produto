@@ -1,4 +1,5 @@
 import type { Loja } from '../api/lojaService'
+import { formatHorarioFuncionamento } from '../features/lojas/utils'
 
 type LojaListProps = {
     lojas: Loja[]
@@ -84,6 +85,7 @@ export default function LojaList({
                   !lojasError &&
                   lojas.map((loja, index) => {
                     const isAberto = Boolean(loja.aberto)
+                    const horario = formatHorarioFuncionamento(loja.horarioFuncionamento)
 
                     return (
                       <div
@@ -106,14 +108,23 @@ export default function LojaList({
                           <div className="product-card-name" title={loja.nome}>
                             {loja.nome}
                           </div>
-                                    <div className="product-card-meta">
-                                        <span className="product-card-price">
-                                            Taxa Entrega: R$ {Number(loja.taxaEntrega).toFixed(2)}
-                                        </span>
-                                        <span className="product-card-cat">
-                                            {loja.endereco}
-                                        </span>
-                                    </div>
+
+                          {loja.descricao && (
+                            <p className="store-card-description" title={loja.descricao}>
+                              {loja.descricao}
+                            </p>
+                          )}
+
+                          <div className="store-card-details">
+                            <span title={loja.endereco}>{loja.endereco}</span>
+                            <span>{loja.telefone}</span>
+                            <span title={horario}>{horario}</span>
+                          </div>
+
+                          <div className="store-card-fees">
+                            <span>Servico: R$ {Number(loja.taxaServico).toFixed(2)}</span>
+                            <span>Entrega: R$ {Number(loja.taxaEntrega).toFixed(2)}</span>
+                          </div>
                                 </div>
 
                                 <div className="product-card-footer">

@@ -1,9 +1,18 @@
+import type { DiaSemana } from '../../api/lojaService'
+
 export type ToastType = 'success' | 'error'
 
 export type ToastState = {
   message: string
   type: ToastType
 } | null
+
+export type HorarioFuncionamentoFormState = {
+  diaSemana: DiaSemana
+  ativo: boolean
+  horaAbertura: string
+  horaFechamento: string
+}
 
 export type LojaFormState = {
   nome: string
@@ -15,7 +24,7 @@ export type LojaFormState = {
   existingLogo: string | null
   taxaServico: string
   taxaEntrega: string
-  horarioFuncionamento: string
+  horarioFuncionamento: HorarioFuncionamentoFormState[]
 }
 
 export type LojaApiError = {

@@ -1115,6 +1115,61 @@ select option {
   margin-top: 0.25rem;
 }
 
+.schedule-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.schedule-row {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  gap: 0.65rem;
+  align-items: center;
+  padding: 0.55rem;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  background: var(--bg-input);
+}
+
+.schedule-row.is-active {
+  border-color: var(--border);
+}
+
+.schedule-day {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--text-sub);
+  font-size: 0.78rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.schedule-day input {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  accent-color: var(--primary);
+  appearance: auto;
+}
+
+.schedule-times {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.45rem;
+}
+
+.schedule-times input {
+  min-width: 0;
+  padding: 0.55rem 0.6rem;
+}
+
+.schedule-times input:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .btn-submit,
 .btn-cancel {
   display: flex;
@@ -1335,6 +1390,53 @@ select option {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.store-card-description {
+  display: -webkit-box;
+  min-height: 2.5rem;
+  color: var(--text-sub);
+  font-size: 0.76rem;
+  line-height: 1.35;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.store-card-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.store-card-details span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.store-card-fees {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+  margin-top: 0.25rem;
+}
+
+.store-card-fees span {
+  min-width: 0;
+  padding: 0.35rem 0.45rem;
+  border-radius: 8px;
+  background: var(--bg-input);
+  color: var(--primary);
+  font-size: 0.72rem;
+  font-weight: 800;
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .product-card-meta {
