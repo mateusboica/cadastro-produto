@@ -9,6 +9,7 @@ import SystemPlaceholderPage from '../pages/SystemPlaceholderPage'
 import { RotasPrivadas } from './RotasPrivadas'
 import EditAccount from '../pages/EditAccount'
 import EditLoja from '../pages/EditLoja'
+import PedidosPage from '../pages/PedidosPage'
 
 export default function Router() {
   const [carregando, setCarregando] = useState(true)
@@ -48,10 +49,7 @@ export default function Router() {
           <Route
             path="/pedidos"
             element={
-              <SystemPlaceholderPage
-                title="Pedidos"
-                description="Aqui entra a tela para acompanhar novos pedidos, atualizar status e consultar historico."
-              />
+              <PedidosPage />
             }
           />
           <Route
