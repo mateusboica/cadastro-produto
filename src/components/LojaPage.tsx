@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { ChangeEvent, FormEvent } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import imageService from '../api/imageService'
@@ -13,6 +13,8 @@ import {
 } from '../features/lojas/utils'
 import LojaForm from './LojaForm'
 import LojaList from './LojaList'
+
+const MAX_LOGO_SIZE_BYTES = 5 * 1024 * 1024
 
 const emptyFormState = (): LojaFormState => ({
   nome: '',
@@ -36,6 +38,61 @@ async function uploadParaImgBB(arquivo: File) {
   }
 }
 
+function validateLojaForm(form: LojaFormState) {
+  const nome = form.nome.trim()
+  const endereco = form.endereco.trim()
+  const telefone = form.telefone.trim()
+  const descricao = form.descricao.trim()
+  const taxaServico = Number.parseFloat(form.taxaServico)
+  const taxaEntrega = Number.parseFloat(form.taxaEntrega)
+  const horariosAtivos = form.horarioFuncionamento.filter((horario) => horario.ativo)
+
+  if (!nome || nome.length < 3) {
+    return 'Informe um nome com pelo menos 3 caracteres.'
+  }
+
+  if (!descricao) {
+    return 'Informe a descricao da loja.'
+  }
+
+  if (!endereco) {
+    return 'Informe o endereco da loja.'
+  }
+
+  if (!telefone) {
+    return 'Informe o telefone da loja.'
+  }
+
+  if (Number.isNaN(taxaServico) || taxaServico < 0) {
+    return 'Informe uma taxa de servico valida.'
+  }
+
+  if (Number.isNaN(taxaEntrega) || taxaEntrega < 0) {
+    return 'Informe uma taxa de entrega valida.'
+  }
+
+  if (horariosAtivos.length === 0) {
+    return 'Ative pelo menos um dia de funcionamento.'
+  }
+
+  const hasInvalidHorario = horariosAtivos.some(
+    (horario) =>
+      !horario.horaAbertura ||
+      !horario.horaFechamento ||
+      horario.horaFechamento <= horario.horaAbertura,
+  )
+
+  if (hasInvalidHorario) {
+    return 'Confira os horarios: o fechamento deve ser depois da abertura.'
+  }
+
+  if (!form.logoFile && !form.existingLogo) {
+    return 'Selecione uma logo para a loja.'
+  }
+
+  return null
+}
+
 export default function LojaPage() {
   const { showToast } = useOutletContext<AppOutletContext>()
   const [lojas, setLojas] = useState<Loja[]>([])
@@ -45,6 +102,27 @@ export default function LojaPage() {
   const [editingLojaId, setEditingLojaId] = useState<string | null>(null)
   const [lojasError, setLojasError] = useState(false)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const lojaStats = useMemo(() => {
+    const open = lojas.filter((loja) => Boolean(loja.aberto ?? loja.isAberto)).length
+    const activeScheduleDays = new Set(
+      lojas.flatMap((loja) =>
+        loja.horarioFuncionamento?.map((horario) => horario.diaSemana) ?? [],
+      ),
+    ).size
+    const averageDeliveryFee =
+      lojas.length > 0
+        ? lojas.reduce((total, loja) => total + Number(loja.taxaEntrega || 0), 0) /
+          lojas.length
+        : 0
+
+    return {
+      total: lojas.length,
+      open,
+      closed: lojas.length - open,
+      activeScheduleDays,
+      averageDeliveryFee,
+    }
+  }, [lojas])
 
   useEffect(() => {
     carregarLojas()
@@ -101,6 +179,19 @@ export default function LojaPage() {
 
   function handleLogoChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0] ?? null
+
+    if (file && !file.type.startsWith('image/')) {
+      event.target.value = ''
+      showToast('Selecione um arquivo de imagem valido.', 'error')
+      return
+    }
+
+    if (file && file.size > MAX_LOGO_SIZE_BYTES) {
+      event.target.value = ''
+      showToast('A logo deve ter no maximo 5 MB.', 'error')
+      return
+    }
+
     setForm((current) => ({
       ...current,
       logoFile: file,
@@ -124,58 +215,33 @@ export default function LojaPage() {
     event.preventDefault()
 
     const nome = form.nome.trim()
-    const endereco = form.endereco.trim()
-    const telefone = form.telefone.trim()
-    const descricao = form.descricao.trim()
-    const taxaServico = Number.parseFloat(form.taxaServico)
-    const taxaEntrega = Number.parseFloat(form.taxaEntrega)
-    const horariosAtivos = form.horarioFuncionamento.filter((horario) => horario.ativo)
+    const validationMessage = validateLojaForm(form)
 
-    if (
-      !nome ||
-      !descricao ||
-      !endereco ||
-      !telefone ||
-      Number.isNaN(taxaServico) ||
-      Number.isNaN(taxaEntrega) ||
-      horariosAtivos.length === 0
-    ) {
-      showToast('Preencha os campos obrigatorios.', 'error')
-      return
-    }
-
-    const hasInvalidHorario = horariosAtivos.some(
-      (horario) =>
-        !horario.horaAbertura ||
-        !horario.horaFechamento ||
-        horario.horaFechamento <= horario.horaAbertura,
-    )
-
-    if (hasInvalidHorario) {
-      showToast('Confira os horarios: o fechamento deve ser depois da abertura.', 'error')
-      return
-    }
-
-    let logoUrl = form.existingLogo
-
-    if (form.logoFile) {
-      showToast('Fazendo upload da logo...', 'success')
-      logoUrl = await uploadParaImgBB(form.logoFile)
-
-      if (!logoUrl) {
-        showToast('Falha no upload da logo. Tente novamente.', 'error')
-        return
-      }
-    }
-
-    if (!logoUrl) {
-      showToast('A logo da loja e obrigatoria.', 'error')
+    if (validationMessage) {
+      showToast(validationMessage, 'error')
       return
     }
 
     setIsSubmitting(true)
 
+    let logoUrl = form.existingLogo
+
     try {
+      if (form.logoFile) {
+        showToast('Enviando logo...', 'success')
+        logoUrl = await uploadParaImgBB(form.logoFile)
+
+        if (!logoUrl) {
+          showToast('Falha no upload da logo. Tente novamente.', 'error')
+          return
+        }
+      }
+
+      if (!logoUrl) {
+        showToast('A logo da loja e obrigatoria.', 'error')
+        return
+      }
+
       const lojaPayload = {
         ...createLojaPayload(form),
         logoUrl,
@@ -241,27 +307,56 @@ export default function LojaPage() {
   }
 
   return (
-    <div className="page">
-      <LojaForm
-        form={form}
-        previewUrl={previewUrl}
-        isSubmitting={isSubmitting}
-        editingLojaId={editingLojaId}
-        onSubmit={handleSubmit}
-        onFieldChange={handleFieldChange}
-        onLogoChange={handleLogoChange}
-        onAbertoToggle={handleAbertoToggle}
-        onHorarioChange={handleHorarioChange}
-        onResetForm={resetForm}
-      />
+    <div className="product-page-shell store-page-shell">
+      <section className="product-command-bar">
+        <div>
+          <span className="product-kicker">Operacao da loja</span>
+          <h1>Configurar loja</h1>
+          <p>Gerencie identidade, endereco, taxas, atendimento e horarios da operacao.</p>
+        </div>
 
-      <LojaList
-        lojas={lojas}
-        isLoadingLojas={isLoadingLojas}
-        lojasError={lojasError}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+        <div className="product-stats" aria-label="Resumo das lojas">
+          <div className="product-stat">
+            <span>Total</span>
+            <strong>{lojaStats.total}</strong>
+          </div>
+          <div className="product-stat">
+            <span>Abertas</span>
+            <strong>{lojaStats.open}</strong>
+          </div>
+          <div className="product-stat">
+            <span>Fechadas</span>
+            <strong>{lojaStats.closed}</strong>
+          </div>
+          <div className="product-stat">
+            <span>Entrega/km</span>
+            <strong>R$ {lojaStats.averageDeliveryFee.toFixed(2)}</strong>
+          </div>
+        </div>
+      </section>
+
+      <div className="page product-page-grid">
+        <LojaForm
+          form={form}
+          previewUrl={previewUrl}
+          isSubmitting={isSubmitting}
+          editingLojaId={editingLojaId}
+          onSubmit={handleSubmit}
+          onFieldChange={handleFieldChange}
+          onLogoChange={handleLogoChange}
+          onAbertoToggle={handleAbertoToggle}
+          onHorarioChange={handleHorarioChange}
+          onResetForm={resetForm}
+        />
+
+        <LojaList
+          lojas={lojas}
+          isLoadingLojas={isLoadingLojas}
+          lojasError={lojasError}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
+      </div>
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { ChangeEvent, FormEvent, KeyboardEvent } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import imageService from '../api/imageService'
@@ -14,6 +14,9 @@ import {
 } from '../features/products/utils'
 import ProductForm from './ProductForm'
 import ProductList from './ProductList'
+
+const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024
+const MAX_TAGS = 12
 
 const emptyFormState = (): FormState => ({
   nome: '',
@@ -35,6 +38,34 @@ async function uploadParaImgBB(arquivo: File) {
   }
 }
 
+function validateProductForm(form: FormState) {
+  const nome = form.nome.trim()
+  const descricao = form.descricao.trim()
+  const preco = Number.parseFloat(form.preco)
+
+  if (!nome || nome.length < 3) {
+    return 'Informe um nome com pelo menos 3 caracteres.'
+  }
+
+  if (Number.isNaN(preco) || preco <= 0) {
+    return 'Informe um preco valido maior que zero.'
+  }
+
+  if (!descricao) {
+    return 'Informe a descricao do produto.'
+  }
+
+  if (!form.categoria) {
+    return 'Selecione a categoria do produto.'
+  }
+
+  if (!form.imageFile && !form.existingImage) {
+    return 'Selecione uma imagem do produto.'
+  }
+
+  return null
+}
+
 export default function ProductPage() {
   const { showToast } = useOutletContext<AppOutletContext>()
   const [products, setProducts] = useState<Product[]>([])
@@ -47,6 +78,19 @@ export default function ProductPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
   const slug = gerarSlug(form.nome)
+  const productStats = useMemo(() => {
+    const available = products.filter((product) =>
+      Boolean(product.isDisponivel ?? product.disponivel),
+    ).length
+    const categoryCount = new Set(products.map((product) => product.categoria)).size
+
+    return {
+      total: products.length,
+      available,
+      unavailable: products.length - available,
+      categoryCount,
+    }
+  }, [products])
 
   useEffect(() => {
     carregarProdutos()
@@ -104,6 +148,19 @@ export default function ProductPage() {
 
   function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0] ?? null
+
+    if (file && !file.type.startsWith('image/')) {
+      event.target.value = ''
+      showToast('Selecione um arquivo de imagem valido.', 'error')
+      return
+    }
+
+    if (file && file.size > MAX_IMAGE_SIZE_BYTES) {
+      event.target.value = ''
+      showToast('A imagem deve ter no maximo 5 MB.', 'error')
+      return
+    }
+
     setForm((current) => ({
       ...current,
       imageFile: file,
@@ -120,6 +177,12 @@ export default function ProductPage() {
     const value = normalizeTag(tagInput)
 
     if (!value || form.tags.includes(value)) {
+      setTagInput('')
+      return
+    }
+
+    if (form.tags.length >= MAX_TAGS) {
+      showToast(`Use no maximo ${MAX_TAGS} tags por produto.`, 'error')
       setTagInput('')
       return
     }
@@ -142,31 +205,31 @@ export default function ProductPage() {
     event.preventDefault()
 
     const nome = form.nome.trim()
-    const preco = Number.parseFloat(form.preco)
+    const validationMessage = validateProductForm(form)
 
-    if (!nome || Number.isNaN(preco) || preco <= 0 || !form.categoria) {
-      showToast('Preencha os campos obrigatorios.', 'error')
+    if (validationMessage) {
+      showToast(validationMessage, 'error')
       return
-    }
-
-    let imageUrl = form.existingImage
-
-    if (form.imageFile) {
-      showToast('Fazendo upload da imagem...', 'success')
-      imageUrl = await uploadParaImgBB(form.imageFile)
-
-      if (!imageUrl) {
-        showToast('Falha no upload da imagem. Tente novamente.', 'error')
-        return
-      }
     }
 
     setIsSubmitting(true)
 
+    let imageUrl = form.existingImage
+
     try {
+      if (form.imageFile) {
+        showToast('Enviando imagem...', 'success')
+        imageUrl = await uploadParaImgBB(form.imageFile)
+
+        if (!imageUrl) {
+          showToast('Falha no upload da imagem. Tente novamente.', 'error')
+          return
+        }
+      }
+
       const productPayload = {
         ...createProductPayload(form),
-        img: imageUrl || null,
+        img: imageUrl,
       }
 
       if (editingProductId) {
@@ -230,31 +293,60 @@ export default function ProductPage() {
   }
 
   return (
-    <div className="page">
-      <ProductForm
-        form={form}
-        tagInput={tagInput}
-        slug={slug}
-        previewUrl={previewUrl}
-        isSubmitting={isSubmitting}
-        editingProductId={editingProductId}
-        onSubmit={handleSubmit}
-        onFieldChange={handleFieldChange}
-        onImageChange={handleImageChange}
-        onTagInputChange={setTagInput}
-        onTagKeyDown={handleTagKeyDown}
-        onRemoveTag={removeTag}
-        onDisponivelToggle={handleDisponivelToggle}
-        onResetForm={resetForm}
-      />
+    <div className="product-page-shell">
+      <section className="product-command-bar">
+        <div>
+          <span className="product-kicker">Gestao de cardapio</span>
+          <h1>Produtos</h1>
+          <p>Controle de itens, imagens, categorias e disponibilidade da loja.</p>
+        </div>
 
-      <ProductList
-        products={products}
-        isLoadingProducts={isLoadingProducts}
-        productsError={productsError}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+        <div className="product-stats" aria-label="Resumo do cardapio">
+          <div className="product-stat">
+            <span>Total</span>
+            <strong>{productStats.total}</strong>
+          </div>
+          <div className="product-stat">
+            <span>Ativos</span>
+            <strong>{productStats.available}</strong>
+          </div>
+          <div className="product-stat">
+            <span>Pausados</span>
+            <strong>{productStats.unavailable}</strong>
+          </div>
+          <div className="product-stat">
+            <span>Categorias</span>
+            <strong>{productStats.categoryCount}</strong>
+          </div>
+        </div>
+      </section>
+
+      <div className="page product-page-grid">
+        <ProductForm
+          form={form}
+          tagInput={tagInput}
+          slug={slug}
+          previewUrl={previewUrl}
+          isSubmitting={isSubmitting}
+          editingProductId={editingProductId}
+          onSubmit={handleSubmit}
+          onFieldChange={handleFieldChange}
+          onImageChange={handleImageChange}
+          onTagInputChange={setTagInput}
+          onTagKeyDown={handleTagKeyDown}
+          onRemoveTag={removeTag}
+          onDisponivelToggle={handleDisponivelToggle}
+          onResetForm={resetForm}
+        />
+
+        <ProductList
+          products={products}
+          isLoadingProducts={isLoadingProducts}
+          productsError={productsError}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
+      </div>
     </div>
   )
 }
